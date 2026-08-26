@@ -16,14 +16,14 @@ if (menuToggle && nav) {
    CONTACT FORM (index.html)
 ========================== */
 
-const contactForm = document.querySelector(".contact form");
+const contactForm = document.querySelector("#contactForm");
 
 if (contactForm) {
     const status = document.createElement("p");
     status.className = "form-status";
     contactForm.appendChild(status);
 
-    contactForm.addEventListener("submit", (e) => {
+    contactForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const name = contactForm.querySelector('[name="name"]').value.trim();
@@ -36,62 +36,32 @@ if (contactForm) {
             return;
         }
 
-        // No backend connected yet — this just confirms the form works.
-        // Replace this block with a fetch() call to your server/email API.
-        status.textContent = "Thanks! Your message has been noted.";
-        status.className = "form-status success";
-        contactForm.reset();
+        status.textContent = "Sending...";
+        status.className = "form-status";
+
+        try {
+            const response = await fetch(contactForm.action, {
+                method: "POST",
+                body: new FormData(contactForm),
+                headers: { "Accept": "application/json" }
+            });
+
+            if (response.ok) {
+                status.textContent = "Thanks! Your message has been sent.";
+                status.className = "form-status success";
+                contactForm.reset();
+            } else {
+                status.textContent = "Something went wrong. Please try again.";
+                status.className = "form-status error";
+            }
+        } catch (err) {
+            status.textContent = "Network error. Please check your connection.";
+            status.className = "form-status error";
+        }
     });
 }
 
 /* ==========================
-   LOGIN FORM (pages/login.html)
+   LOGIN / REGISTER
+   Now handled by js/auth.js using real Firebase Authentication
 ========================== */
-
-const loginForm = document.querySelector(".login-box form");
-
-if (loginForm && loginForm.querySelector('[name="username"]')) {
-    loginForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const username = loginForm.querySelector('[name="username"]').value.trim();
-        const password = loginForm.querySelector('[name="password"]').value.trim();
-        const errorEl = loginForm.querySelector(".field-error");
-
-        if (!username || !password) {
-            if (errorEl) errorEl.textContent = "Enter both username and password.";
-            return;
-        }
-
-        if (errorEl) errorEl.textContent = "";
-
-        // No backend connected yet — this is where you'd call your auth API.
-        alert("Login submitted (no backend connected yet).");
-    });
-}
-
-/* ==========================
-   REGISTER FORM (pages/register.html)
-========================== */
-
-const registerForm = document.querySelector(".login-box form");
-
-if (registerForm && registerForm.querySelector('[name="confirmPassword"]')) {
-    registerForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const password = registerForm.querySelector('[name="password"]').value;
-        const confirm = registerForm.querySelector('[name="confirmPassword"]').value;
-        const errorEl = registerForm.querySelector(".field-error");
-
-        if (password !== confirm) {
-            if (errorEl) errorEl.textContent = "Passwords do not match.";
-            return;
-        }
-
-        if (errorEl) errorEl.textContent = "";
-
-        // No backend connected yet — this is where you'd call your signup API.
-        alert("Registration submitted (no backend connected yet).");
-    });
-}
